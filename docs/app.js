@@ -1,5 +1,6 @@
 import {Farm,Runner,CROPS,UPGRADES,LESSONS,currentLesson,restorePlayerCode} from './engine.js';
 import {connectAccount} from './account.js';
+import {setupGuide} from './lesson-guide.js';
 
 const $=id=>document.getElementById(id);
 let account;
@@ -9,6 +10,7 @@ try{saved=JSON.parse(localStorage.getItem(STORAGE));}catch{storageOK=false;}
 let farm=new Farm(saved?.farm),runner=null,running=false,speed=1,accumulator=0,lastTime=performance.now(),lastSave=0,lastUI=0;
 let hover=null,toastTimer,robotVisual={...farm.robot},particles=[],lastRobotAction=0,upgradesRenderKey='',lastLesson=-2;
 const code=$('code'),canvas=$('farm'),ctx=canvas.getContext('2d');
+const renderGuide = setupGuide();
 canvas.width=900;canvas.height=590;
 code.value=restorePlayerCode(saved);
 
@@ -67,7 +69,8 @@ function updateUI(){
   $('questTask').textContent=lesson?.task??'Исследуй новые культуры и сравнивай эффективность своих алгоритмов.';
   $('questNumber').textContent=String(index<0?LESSONS.length:index+1).padStart(2,'0')+' / '+LESSONS.length;
   $('questProgress').style.width=(index<0?100:index/LESSONS.length*100)+'%';$('lessonSyntax').textContent=lesson?.syntax??'';$('lessonHint').textContent=lesson?.hint??'Подумай, какие действия выполняются чаще всего и какие проверки можно сократить.';
-  $('miniLessonTitle').textContent=lesson?'Урок '+String(index+1).padStart(2,'0')+' · '+lesson.title:'Самостоятельная ферма';$('miniLessonTask').textContent=lesson?.task??'Экспериментируй, сравнивай и улучшай свой код.';
+  $('miniLessonTitle').textContent=lesson?'Урок '+String(index+1).padStart(2,'0')+' · '+lesson.title:'Самостоятельная ферма';
+  renderGuide(farm, index);
   if(index!==lastLesson){if(lastLesson!==-2){toast(index<0?'Начальные главы пройдены!':'Следующая глава: '+lesson.title);$('lessonHintDetails').open=false;renderReference();}lastLesson=index;}
   if($('upgradesDialog').open)renderUpgrades();
 }
@@ -88,7 +91,6 @@ function showDialog(id){if(id==='helpDialog')renderReference();$(id).showModal()
 document.querySelectorAll('.close-dialog').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
 $('helpButton').onclick=()=>showDialog('helpDialog');$('referenceButton').onclick=()=>showDialog('helpDialog');document.querySelector('.dialog-start').onclick=()=>$('helpDialog').close();
-$('lessonButton').onclick=()=>showDialog('helpDialog');
 $('upgradesButton').onclick=()=>{renderUpgrades();showDialog('upgradesDialog');};
 $('resetButton').onclick=()=>showDialog('resetDialog');document.querySelector('.cancel-reset').onclick=()=>$('resetDialog').close();
 $('confirmReset').onclick=()=>{stop(false);farm=new Farm();setEvents();robotVisual={...farm.robot};particles=[];hover=null;lastLesson=-2;code.value='';code.scrollTop=0;code.scrollLeft=0;updateHighlight();updateUI();save(true);$('resetDialog').close();$('consoleOutput').replaceChildren();log('Одна клетка. Одна команда. Начни с первого урока под полем.','success');toast('Новая ферма. Начни с первой команды.');};
