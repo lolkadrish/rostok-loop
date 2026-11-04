@@ -1,6 +1,8 @@
 import {Farm,Runner,CROPS,UPGRADES,LESSONS,currentLesson,restorePlayerCode} from './engine.js';
+import {connectAccount} from './account.js';
 
 const $=id=>document.getElementById(id);
+let account;
 const STORAGE='rostok-loop-v1';
 let saved=null,storageOK=true;
 try{saved=JSON.parse(localStorage.getItem(STORAGE));}catch{storageOK=false;}
@@ -17,7 +19,30 @@ function log(message,type='info'){
   while($('consoleOutput').children.length>80)$('consoleOutput').firstChild.remove();$('consoleOutput').scrollTop=$('consoleOutput').scrollHeight;
 }
 function toast(text){$('toast').textContent=text;$('toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),3400);}
-function save(){try{localStorage.setItem(STORAGE,JSON.stringify({farm:farm.serialize(),code:code.value,codeOrigin:'player'}));storageOK=true;}catch{storageOK=false;}$('saveStatus').innerHTML=storageOK?'Прогресс сохранён<small>в этом браузере</small>':'Сохранение недоступно<small>не закрывай вкладку</small>';}
+function snapshot() {
+  return {farm: farm.serialize(), code: code.value, codeOrigin: 'player'};
+}
+function guestSave() {
+  try { return JSON.parse(localStorage.getItem(STORAGE)); } catch { return null; }
+}
+function save(edited = false) {
+  if (account && !account.isGuest()) {
+    if (edited === true) account.edit(snapshot());
+    return;
+  }
+  try { localStorage.setItem(STORAGE, JSON.stringify(snapshot())); storageOK = true; }
+  catch { storageOK = false; }
+  $('saveStatus').innerHTML = storageOK ? 'Прогресс сохранён<small>в этом браузере</small>' : 'Сохранение недоступно<small>не закрывай вкладку</small>';
+}
+function openFarm(data) {
+  stop(false);
+  farm = new Farm(data?.farm);
+  setEvents();
+  robotVisual = {...farm.robot}; particles = []; hover = null; lastLesson = -2; upgradesRenderKey = '';
+  code.value = restorePlayerCode(data); code.scrollTop = 0; code.scrollLeft = 0;
+  $('floatingReward').replaceChildren(); $('consoleOutput').replaceChildren(); $('lineStatus').textContent = 'Строка 1';
+  updateHighlight(); updateUI(); renderReference(); lastTime = performance.now();
+}
 function setEvents(){farm.onEvent=event=>{
   lastRobotAction=performance.now();
   if(event.type==='harvest'){
@@ -28,7 +53,7 @@ function setEvents(){farm.onEvent=event=>{
   }
   if(event.type==='water'){const g=geometry();for(let i=0;i<8;i++)particles.push({x:g.x+(farm.robot.x+.5)*g.tile,y:g.y+(farm.robot.y+.5)*g.tile,dx:(Math.random()-.5)*35,dy:-Math.random()*35,life:.7,color:'#94d8d0'});}
   if(event.type==='upgrade'){toast('Открыто: '+UPGRADES.find(u=>u.id===event.id).name);log('Новое открытие! Пояснения — в учебнике.','success');upgradesRenderKey='';renderReference();}
-  updateUI();
+  updateUI(); save(true);
 };}
 setEvents();
 function updateUI(){
@@ -66,7 +91,7 @@ $('helpButton').onclick=()=>showDialog('helpDialog');$('referenceButton').onclic
 $('lessonButton').onclick=()=>showDialog('helpDialog');
 $('upgradesButton').onclick=()=>{renderUpgrades();showDialog('upgradesDialog');};
 $('resetButton').onclick=()=>showDialog('resetDialog');document.querySelector('.cancel-reset').onclick=()=>$('resetDialog').close();
-$('confirmReset').onclick=()=>{stop(false);farm=new Farm();setEvents();robotVisual={...farm.robot};particles=[];hover=null;lastLesson=-2;code.value='';code.scrollTop=0;code.scrollLeft=0;updateHighlight();updateUI();save();$('resetDialog').close();$('consoleOutput').replaceChildren();log('Одна клетка. Одна команда. Начни с первого урока под полем.','success');toast('Новая ферма. Начни с первой команды.');};
+$('confirmReset').onclick=()=>{stop(false);farm=new Farm();setEvents();robotVisual={...farm.robot};particles=[];hover=null;lastLesson=-2;code.value='';code.scrollTop=0;code.scrollLeft=0;updateHighlight();updateUI();save(true);$('resetDialog').close();$('consoleOutput').replaceChildren();log('Одна клетка. Одна команда. Начни с первого урока под полем.','success');toast('Новая ферма. Начни с первой команды.');};
 $('clearConsole').onclick=()=>$('consoleOutput').replaceChildren();
 
 function updateRunState(){
@@ -77,7 +102,7 @@ function updateRunState(){
 }
 function stop(announce=true){running=false;runner=null;accumulator=0;$('activeLine').style.display='none';updateHighlight();updateRunState();if(announce)log('Программа остановлена. Следующий запуск — с начала.');}
 function startRunner(){try{runner=new Runner(code.value,farm,msg=>log(msg,'success'));return true;}catch(e){runner=null;log(e.message,'error');toast('Проверь код — подсказка в консоли.');updateRunState();return false;}}
-function executeStep(){if(!runner)return;try{const result=runner.step();if(!result){running=false;log('Программа завершена. Хорошая работа!','success');$('activeLine').style.display='none';updateRunState();updateHighlight();return;}highlightLine(result.line);updateUI();}catch(e){running=false;highlightLine(runner.line);log(e.message,'error');toast('Программа остановлена: проверь консоль.');runner=null;updateRunState();}}
+function executeStep(){if(!runner)return;try{const knownBefore=farm.used.length;const result=runner.step();if(farm.used.length!==knownBefore)save(true);if(!result){running=false;log('Программа завершена. Хорошая работа!','success');$('activeLine').style.display='none';updateRunState();updateHighlight();return;}highlightLine(result.line);updateUI();}catch(e){running=false;highlightLine(runner.line);log(e.message,'error');toast('Программа остановлена: проверь консоль.');runner=null;updateRunState();}}
 $('runButton').onclick=()=>{if(running){running=false;log('Пауза. Рост растений продолжается.');updateRunState();save();return;}if((!runner||runner.done)&&!startRunner())return;running=true;accumulator=.32;log('Алгоритм запущен. Пора выращивать!','success');updateRunState();};
 $('stepButton').onclick=()=>{if((!runner||runner.done)&&!startRunner())return;executeStep();updateRunState();};$('stopButton').onclick=()=>stop();
 $('speedButton').onclick=()=>{speed=speed===1?2:speed===2?4:1;$('speedButton').textContent=speed+'×';};
@@ -90,7 +115,7 @@ function updateHighlight(){const lines=code.value.split('\n');$('highlighted').i
 function lineHeight(){return parseFloat(getComputedStyle(code).lineHeight);}
 function syncScroll(){$('highlighted').scrollTop=code.scrollTop;$('highlighted').scrollLeft=code.scrollLeft;$('lineNumbers').scrollTop=code.scrollTop;if(runner)$('activeLine').style.top=((runner.line-1)*lineHeight()-code.scrollTop)+'px';}
 function highlightLine(n){const h=lineHeight(),y=(n-1)*h;if(y<code.scrollTop||y>code.scrollTop+code.clientHeight-h)code.scrollTop=Math.max(0,y-code.clientHeight/2);$('activeLine').style.display='block';$('activeLine').style.top=(y-code.scrollTop)+'px';$('lineStatus').textContent='Строка '+n;updateHighlight();}
-code.addEventListener('input',()=>{if(runner)stop(false);updateHighlight();});code.addEventListener('scroll',syncScroll);code.addEventListener('click',()=>{$('lineStatus').textContent='Строка '+(code.value.slice(0,code.selectionStart).split('\n').length);});
+code.addEventListener('input',()=>{if(runner)stop(false);updateHighlight();save(true);});code.addEventListener('scroll',syncScroll);code.addEventListener('click',()=>{$('lineStatus').textContent='Строка '+(code.value.slice(0,code.selectionStart).split('\n').length);});
 code.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const start=code.selectionStart,end=code.selectionEnd;code.setRangeText('    ',start,end,'end');code.dispatchEvent(new Event('input'));}if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey){e.preventDefault();const start=code.selectionStart,end=code.selectionEnd,previous=code.value.slice(0,start).split('\n').at(-1),indent=previous.match(/^ */)[0]+(previous.trimEnd().endsWith(':')?'    ':'');code.setRangeText('\n'+indent,start,end,'end');code.dispatchEvent(new Event('input'));}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();$('runButton').click();}});
 
 // Pixel world, drawn entirely from small geometric shapes. No asset downloads.
@@ -164,4 +189,12 @@ updateHighlight();updateUI();updateRunState();
 log(saved?'С возвращением! Ферма ждала тебя.':'Система готова. Робот ждёт первую команду.','success');
 log(code.value.trim()?'Твой код восстановлен. Запусти его, когда будешь готов.':'Начни с первой команды. Задание — над редактором, объяснение — в учебнике { }.');
 if(!storageOK)$('saveStatus').innerHTML='Сохранение недоступно<small>не закрывай вкладку</small>';
+if ($('accountButton')) account = connectAccount({
+  snapshot,
+  guest: guestSave,
+  fresh: () => ({farm: new Farm().serialize(), code: '', codeOrigin: 'player'}),
+  restore: openFarm,
+  pause: () => stop(false),
+  lock: locked => { document.querySelector('main').inert = locked; },
+});
 requestAnimationFrame(frame);
