@@ -5,13 +5,15 @@
   <meta name="theme-color" content="#f2f3eb">
   <meta name="description" content="Программируйте маленького робота, выращивайте урожай и создавайте ферму, которая работает сама. Бесплатная 2D-игра в браузере.">
   <title>РОСТОК / LOOP — ферма на коде</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="appearance.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#" aria-label="Росток LOOP — главная"><span class="brand-icon">↟</span><span>РОСТОК <i>/</i> <b>LOOP</b><small>ВЫРАСТИ СВОЙ АЛГОРИТМ</small></span></a>
     <div class="header-note"><span class="live-dot"></span> Маленькая ферма. Большие идеи.</div>
-    <div class="header-actions"><button class="button quiet" id="accountButton">Войти</button>
+    <div class="header-actions"><button class="button quiet" id="themeButton" type="button">Тема</button><button class="button quiet" id="accountButton">Войти</button>
     <button class="button quiet" id="helpButton"><span>?</span> Учебник</button></div>
   </header>
 
@@ -35,12 +37,16 @@
 
         <section class="inventory-panel panel"><span class="inventory-title">СКЛАД</span><div id="inventory"></div></section>
 
-        <section class="quest lesson-card panel"><div class="quest-main"><div class="eyebrow">ПУТЬ ПРОГРАММИСТА <span id="questNumber">01 / 10</span></div><h3 id="questTitle">Первая команда</h3><p id="questDescription">Робот выполняет команды по порядку.</p><div id="questTask" class="lesson-task">Напечатай harvest() и запусти свою программу.</div><pre id="lessonSyntax" class="lesson-syntax">harvest()</pre><details id="lessonHintDetails"><summary>Показать подсказку</summary><p id="lessonHint"></p></details><div class="progress-track"><div id="questProgress"></div></div></div></section>
+        <section class="quest lesson-card panel"><div class="quest-main"><div class="eyebrow">ПУТЬ ПРОГРАММИСТА <span id="questNumber">01 / 10</span></div><h3 id="questTitle">Первая команда</h3><p id="questDescription">Робот выполняет команды по порядку.</p><div id="questTask" class="lesson-task">Собери спелую пшеницу под роботом.</div><details id="lessonHintDetails"><summary>Посмотреть запись команды</summary><pre id="lessonSyntax" class="lesson-syntax"></pre><p id="lessonHint"></p></details><div class="progress-track"><div id="questProgress"></div></div></div></section>
       </div>
 
       <section class="code-panel" aria-label="Редактор программы">
         <div class="code-top"><div class="code-tab"><span>⌘</span> main.py <span class="file-dot"></span></div><span class="language">MINI PYTHON</span><button id="referenceButton" aria-label="Справочник команд" title="Справочник команд">{ }</button></div>
-        <div class="editor-toolbar"><div><span id="miniLessonTitle">Урок 01 · Первая команда</span><p id="miniLessonTask">Напечатай harvest() и запусти программу.</p></div><button id="lessonButton">Объяснение ↗</button></div>
+        <div class="editor-toolbar"><div><span id="miniLessonTitle">Урок 01 · Первая команда</span><p id="miniLessonTask">Собери спелую пшеницу под роботом.</p><button id="goalShop" type="button" hidden>Открыть мастерскую ↗</button></div><button id="lessonButton" type="button" aria-controls="thinkingGuide" aria-expanded="false">Как придумать код?</button></div>
+        <aside id="thinkingGuide" aria-label="Подсказки к текущей цели" hidden>
+          <ol id="thinkingSteps" aria-live="polite" aria-relevant="additions"></ol>
+          <div><button type="button" id="nextHint">Как записать?</button><button type="button" id="returnToCode">К редактору ↓</button></div>
+        </aside>
         <div class="editor" id="editorWrap"><div class="line-numbers" id="lineNumbers" aria-hidden="true"></div><div class="code-area"><div class="active-line" id="activeLine"></div><pre id="highlighted" aria-hidden="true"></pre><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Код программы на упрощённом Python" placeholder="Напиши свою первую команду…"></textarea></div></div>
         <div class="editor-note"><span>↳</span> Все действия робота — только из твоей программы.</div>
         <div class="runbar"><button class="button run" id="runButton"><span>▶</span> Запустить</button><button class="button step" id="stepButton" title="Выполнить одно действие">Шаг ↦</button><button class="icon-button" id="stopButton" title="Остановить программу" aria-label="Остановить программу">■</button><div class="speed-control"><span>Скорость</span><button id="speedButton" title="Изменить скорость">1×</button></div></div>

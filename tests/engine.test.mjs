@@ -19,3 +19,18 @@ test('new saves preserve learning and inventory; old farms retain unlocked langu
 test('new editor stays blank and a player-written program survives migration',()=>{assert.equal(restorePlayerCode(null),'');const code='harvest()\nmove(East)';assert.equal(restorePlayerCode({code}),code);assert.equal(restorePlayerCode({code,codeOrigin:'player'}),code);assert.equal(restorePlayerCode({code:'# Твоя следующая большая идея.\n\n'}),'');assert.throws(()=>new Runner('',new Farm()),/Редактор пуст/);});
 test('an untouched old demo starts the new learning path without resetting earned progress',()=>{const old={version:1,size:6,coins:25,harvests:0,actions:0,planted:0,upgrades:[],unlocked:['wheat'],tiles:Array.from({length:36},()=>({crop:'wheat',growth:1,water:0}))};const untouched=new Farm(old);assert.equal(untouched.size,1);assert.equal(untouched.coins,0);assert.equal(currentLesson(untouched),0);const played=new Farm({...old,harvests:1,coins:28});assert.equal(played.size,6);assert.equal(played.coins,28);assert.equal(played.harvests,1);});
 test('all ten lessons are reachable from a fresh farm through authored code and earned research',()=>{const f=new Farm();execute('harvest()',f);f.tick(6);execute('harvest()',f);assert.equal(f.buy('loops'),true);const producer=new Runner('while True:\n    harvest()',f);for(let i=0;i<300;i++){f.tick(6);producer.step();}assert.equal(f.buy('expand2'),true);execute('move(East)\nmove(South)\nmove(West)\nmove(North)',f);assert.equal(f.buy('plant'),true);for(let i=0;i<4;i++){f.tick(6);execute('harvest()\nplant("wheat")\nmove(East)',f);}assert.equal(f.buy('senses'),true);execute('if can_harvest():\n    harvest()',f);assert.equal(f.buy('for'),true);assert.equal(f.buy('grid4'),true);execute('for x in range(get_world_size()):\n    move(East)',f);assert.equal(f.buy('water'),true);f.tick(6);execute('water()',f);assert.equal(f.buy('carrot'),true);execute('harvest()\ntill()\nplant("carrot")',f);f.tick(12);execute('harvest()',f);assert.equal(f.inventory.carrot,1);assert.equal(f.buy('beet'),true);assert.equal(f.buy('sunflower'),true);execute('plant("sunflower")',f);f.tick(24);execute('print(measure())\nharvest()',f);assert.equal(currentLesson(f),-1);assert.equal(f.solarHarvests,1);assert.ok(f.coins>=0);});
+
+test('spending all carrots on a beet does not reopen the carrot lesson', () => {
+  const farm = sandbox();
+  farm.current.ground = 'soil';
+  farm.current.crop = 'carrot';
+  farm.current.growth = 1;
+  farm.inventory.carrot = 1;
+  farm.harvest();
+  farm.plant('beet');
+  assert.equal(farm.inventory.carrot, 0);
+  assert.ok(LESSONS[8].done(farm));
+  const legacy = farm.serialize();
+  legacy.used = legacy.used.filter(item => item !== 'harvest:carrot');
+  assert.ok(LESSONS[8].done(new Farm(legacy)));
+});
