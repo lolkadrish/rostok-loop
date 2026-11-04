@@ -19,6 +19,59 @@
 #thinkingGuide #returnToCode { background: transparent; }
 #lessonHintDetails summary { font-size: 11px; color: #526c45; }
 
+html[data-theme="light"] .code-panel {
+  --editor-paper: #fdfef9;
+  --editor-band: #eff3e9;
+  --editor-edge: #d6e0cf;
+  --editor-text: #253b30;
+  --editor-muted: #536951;
+  --editor-accent: #355f39;
+  background: var(--editor-paper);
+  border-color: var(--editor-edge);
+  color: var(--editor-text);
+
+  & :is(.code-top, .console, .editor-status) {
+    background: var(--editor-band);
+    border-color: var(--editor-edge);
+  }
+  & .code-tab {
+    background: var(--editor-paper);
+    border-color: #699457;
+    color: var(--editor-text);
+  }
+  & :is(.language, .code-top > button, .editor-toolbar, .editor-note, .editor-note span,
+         .speed-control > span, .line-numbers, .editor-status, .console-heading,
+         .console-heading button, .log-time, .log-info) { color: var(--editor-muted); }
+  & :is(.code-tab > span:first-child, #miniLessonTitle, .line-numbers .current) { color: var(--editor-accent); }
+  & :is(#miniLessonTask, .editor pre, .console-output) { color: var(--editor-text); }
+  & .runbar { border-color: var(--editor-edge); }
+  & :is(#lessonButton, #goalShop, #thinkingGuide button, .button.step, .icon-button, .speed-control button) {
+    background: #edf3e7;
+    border-color: #b5c8ac;
+    color: var(--editor-accent);
+  }
+  & .button.run { background: #416d46; border-color: #416d46; color: white; }
+  & #thinkingGuide {
+    background: #f1f6eb;
+    border-color: var(--editor-edge);
+    border-left-color: #739664;
+    color: var(--editor-text);
+  }
+  & #thinkingGuide strong, & #thinkingGuide li::marker { color: var(--editor-accent); }
+  & .editor textarea { caret-color: var(--editor-text); }
+  & .editor textarea::placeholder { color: #5c715c; }
+  & .editor textarea::selection { background: #458acb45; }
+  & .active-line { background: #ecf3e3; border-color: #769762; }
+  & .syn-keyword { color: #76418a; }
+  & .syn-function { color: #32663e; }
+  & .syn-string { color: #815315; }
+  & .syn-comment { color: #586b5f; }
+  & .syn-number { color: #924720; }
+  & .syn-direction { color: #1e6874; }
+  & .log-success { color: #356536; }
+  & .log-error { color: #a33832; }
+}
+
 html[data-theme="dark"] {
   color-scheme: dark;
   --paper: #18221e; --ink: #e4eee1; --muted: #a8b8ab; --line: #3b4e41;
