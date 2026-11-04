@@ -11,7 +11,8 @@
   <header class="topbar">
     <a class="brand" href="#" aria-label="Росток LOOP — главная"><span class="brand-icon">↟</span><span>РОСТОК <i>/</i> <b>LOOP</b><small>ВЫРАСТИ СВОЙ АЛГОРИТМ</small></span></a>
     <div class="header-note"><span class="live-dot"></span> Маленькая ферма. Большие идеи.</div>
-    <button class="button quiet" id="helpButton"><span>?</span> Учебник</button>
+    <div class="header-actions"><button class="button quiet" id="accountButton">Войти</button>
+    <button class="button quiet" id="helpButton"><span>?</span> Учебник</button></div>
   </header>
 
   <main>
@@ -54,6 +55,15 @@
 
   <dialog id="upgradesDialog"><div class="dialog-header"><div><div class="eyebrow">ИНВЕСТИРУЙ В СВОЙ АЛГОРИТМ</div><h2>Мастерская</h2></div><button class="close-dialog" aria-label="Закрыть">×</button></div><p class="dialog-description">Урожай открывает новые возможности языка, культуры и пространство.</p><div id="upgradeList"></div><div class="wallet">Твой баланс <strong id="walletCoins">0 ◈</strong></div></dialog>
   <dialog id="resetDialog" class="small-dialog"><div class="dialog-header"><h2>Новая ферма?</h2><button class="close-dialog" aria-label="Закрыть">×</button></div><p>Монеты, грядки, улучшения и код будут сброшены. Начнём с маленького чистого участка.</p><div class="dialog-actions"><button class="button cancel-reset">Продолжить игру</button><button class="button danger" id="confirmReset">Начать заново</button></div></dialog>
+  <dialog id="accountDialog" class="small-dialog" aria-labelledby="accountTitle">
+    <div class="dialog-header"><h2 id="accountTitle">Моя ферма</h2><button class="close-dialog" aria-label="Закрыть">×</button></div>
+    <p id="accountIntro">Войди по почте, чтобы продолжить игру на другом устройстве. При первом входе эта ферма сохранится в аккаунте. Если в аккаунте уже есть ферма, откроется она.</p>
+    <form id="emailForm" class="account-form"><label for="accountEmail">Электронная почта</label><input id="accountEmail" type="email" autocomplete="email" required maxlength="254"><button class="button run">Получить код</button></form>
+    <form id="otpForm" class="account-form" hidden><label for="accountOtp">Код из письма</label><input id="accountOtp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required><button class="button run">Войти</button><button type="button" id="changeEmail" class="button">Ввести почту заново</button></form>
+    <p id="accountIdentity" hidden></p><p id="accountMessage" role="status" aria-live="polite"></p>
+    <div id="conflictChoices" hidden><p>Ферму изменили на двух устройствах. Выбери, какую версию сохранить.</p><p id="conflictSummary"></p><div class="account-options"><button class="button" id="chooseCloud">Открыть облачную</button><button class="button" id="chooseDevice">Оставить эту ферму</button></div></div>
+    <div class="account-options"><button class="button" id="syncNow" hidden>Синхронизировать</button><button class="button" id="logout" hidden>Выйти</button><button class="button" id="backToFarm" hidden>К игре</button></div>
+  </dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="app.js"></script>
 </body>
