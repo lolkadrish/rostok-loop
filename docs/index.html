@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f3eb">
+  <meta name="description" content="Программируйте маленького робота, выращивайте урожай и создавайте ферму, которая работает сама. Бесплатная 2D-игра в браузере.">
+  <title>РОСТОК / LOOP — ферма на коде</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Росток LOOP — главная"><span class="brand-icon">↟</span><span>РОСТОК <i>/</i> <b>LOOP</b><small>ВЫРАСТИ СВОЙ АЛГОРИТМ</small></span></a>
+    <div class="header-note"><span class="live-dot"></span> Маленькая ферма. Большие идеи.</div>
+    <button class="button quiet" id="helpButton"><span>?</span> Учебник</button>
+  </header>
+
+  <main>
+    <section class="intro"><div><div class="eyebrow">ПЕСОЧНИЦА АВТОМАТИЗАЦИИ <span>•</span> ВЕРСИЯ 0.3</div><h1>Посади идею.<br class="mobile-break"> Собери алгоритм.</h1><p>Ты пишешь код. Робот заботится об остальном.</p></div><div class="save-state"><span class="save-icon">✓</span><span id="saveStatus">Прогресс сохраняется<small>в этом браузере</small></span></div></section>
+
+    <section class="stats" aria-label="Ресурсы фермы">
+      <div class="stat"><span class="stat-icon gold">◈</span><div><small>МОНЕТЫ</small><strong id="coins">0</strong></div><span class="stat-caption">на новые возможности</span></div>
+      <div class="stat"><span class="stat-icon sage">♧</span><div><small>СОБРАНО УРОЖАЯ</small><strong id="harvestCount">0</strong></div><span class="stat-caption">всё начинается с семечка</span></div>
+      <div class="stat"><span class="stat-icon lilac">⌘</span><div><small>РАЗМЕР ФЕРМЫ</small><strong id="worldSize">1 × 1</strong></div><span class="stat-caption" id="plotCount">1 грядка</span></div>
+      <button class="stat upgrade-stat" id="upgradesButton"><span class="stat-icon orange">↗</span><div><small>МАСТЕРСКАЯ</small><strong>Улучшения <span>↗</span></strong></div><span class="badge" id="upgradeBadge">0</span></button>
+    </section>
+
+    <section class="workspace">
+      <div class="farm-column">
+        <section class="farm-panel panel">
+          <div class="panel-heading"><div class="panel-title"><span class="tiny-grid">▦</span><h2>Твоя ферма</h2><span class="chip">Участок 01</span></div><div class="weather"><span>☀</span> Всегда хороший день</div></div>
+          <div class="farm-view" id="farmView"><canvas id="farm" aria-label="Двумерная ферма. Робот действует только по программе, написанной игроком." role="img"></canvas><div class="farm-label"><span class="live-dot"></span><span id="robotState">РОБОТ ГОТОВ</span></div><div class="coordinate" id="coordinates">X: 0 &nbsp; Y: 0</div><div id="floatingReward" aria-hidden="true"></div></div>
+          <div class="farm-footer"><div class="crop-legend"><span class="legend-dot wheat"></span> Пшеница <span class="legend-dot carrot"></span> Морковь <span class="legend-dot ready"></span> Готово к сбору</div><span class="field-hint">Края поля соединены ↔</span></div>
+        </section>
+
+        <section class="inventory-panel panel"><span class="inventory-title">СКЛАД</span><div id="inventory"></div></section>
+
+        <section class="quest lesson-card panel"><div class="quest-main"><div class="eyebrow">ПУТЬ ПРОГРАММИСТА <span id="questNumber">01 / 10</span></div><h3 id="questTitle">Первая команда</h3><p id="questDescription">Робот выполняет команды по порядку.</p><div id="questTask" class="lesson-task">Напечатай harvest() и запусти свою программу.</div><pre id="lessonSyntax" class="lesson-syntax">harvest()</pre><details id="lessonHintDetails"><summary>Показать подсказку</summary><p id="lessonHint"></p></details><div class="progress-track"><div id="questProgress"></div></div></div></section>
+      </div>
+
+      <section class="code-panel" aria-label="Редактор программы">
+        <div class="code-top"><div class="code-tab"><span>⌘</span> main.py <span class="file-dot"></span></div><span class="language">MINI PYTHON</span><button id="referenceButton" aria-label="Справочник команд" title="Справочник команд">{ }</button></div>
+        <div class="editor-toolbar"><div><span id="miniLessonTitle">Урок 01 · Первая команда</span><p id="miniLessonTask">Напечатай harvest() и запусти программу.</p></div><button id="lessonButton">Объяснение ↗</button></div>
+        <div class="editor" id="editorWrap"><div class="line-numbers" id="lineNumbers" aria-hidden="true"></div><div class="code-area"><div class="active-line" id="activeLine"></div><pre id="highlighted" aria-hidden="true"></pre><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Код программы на упрощённом Python" placeholder="Напиши свою первую команду…"></textarea></div></div>
+        <div class="editor-note"><span>↳</span> Все действия робота — только из твоей программы.</div>
+        <div class="runbar"><button class="button run" id="runButton"><span>▶</span> Запустить</button><button class="button step" id="stepButton" title="Выполнить одно действие">Шаг ↦</button><button class="icon-button" id="stopButton" title="Остановить программу" aria-label="Остановить программу">■</button><div class="speed-control"><span>Скорость</span><button id="speedButton" title="Изменить скорость">1×</button></div></div>
+        <div class="console"><div class="console-heading"><span><i class="console-dot"></i> КОНСОЛЬ</span><button id="clearConsole">Очистить</button></div><div id="consoleOutput" class="console-output" role="log" aria-live="polite"></div></div>
+        <div class="editor-status"><span><i class="status-dot"></i> <span id="executionStatus">Готов к запуску</span></span><span id="lineStatus">Строка 1</span></div>
+      </section>
+    </section>
+    <footer class="page-footer"><span><b>Меньше рутины, больше логики.</b> Сделано для любопытных.</span><button id="resetButton">Начать заново ↺</button></footer>
+  </main>
+
+  <dialog id="helpDialog" class="help-dialog"><div class="dialog-header"><div><div class="eyebrow">УЧИСЬ НА СОБСТВЕННОЙ ФЕРМЕ</div><h2>От команды к алгоритму.</h2></div><button class="close-dialog" aria-label="Закрыть">×</button></div><p class="help-intro">Начни с одной команды. Наблюдай за результатом, зарабатывай урожай и открывай следующий инструмент. Решения задач ты придумываешь и пишешь самостоятельно.</p><h3 class="reference-title">Доступные инструменты</h3><div id="commandReference" class="reference-grid"></div><h3 class="reference-title">Твой путь</h3><div id="lessonLibrary"></div><div class="help-callout">Пшеница на травяном грунте отрастает сама. На почве растения нужно сажать. Моркови, свёкле и подсолнухам нужны ресурсы со склада. Рост продолжается, пока игра открыта; при возвращении учитывается до 8 часов отсутствия.</div><p class="help-bottom">Это небольшой Python-подобный язык. Возможности открываются в мастерской. Отступ вложенного блока — 4 пробела. «Шаг» выполняет одну инструкцию; Ctrl+Enter запускает или приостанавливает код. Готовые алгоритмы в редактор не вставляются.</p><button class="button run dialog-start">Вернуться к своей программе →</button></dialog>
+
+  <dialog id="upgradesDialog"><div class="dialog-header"><div><div class="eyebrow">ИНВЕСТИРУЙ В СВОЙ АЛГОРИТМ</div><h2>Мастерская</h2></div><button class="close-dialog" aria-label="Закрыть">×</button></div><p class="dialog-description">Урожай открывает новые возможности языка, культуры и пространство.</p><div id="upgradeList"></div><div class="wallet">Твой баланс <strong id="walletCoins">0 ◈</strong></div></dialog>
+  <dialog id="resetDialog" class="small-dialog"><div class="dialog-header"><h2>Новая ферма?</h2><button class="close-dialog" aria-label="Закрыть">×</button></div><p>Монеты, грядки, улучшения и код будут сброшены. Начнём с маленького чистого участка.</p><div class="dialog-actions"><button class="button cancel-reset">Продолжить игру</button><button class="button danger" id="confirmReset">Начать заново</button></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
